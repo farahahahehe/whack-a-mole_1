@@ -1,0 +1,56 @@
+import sys
+from PyQt6.QtWidgets import QApplication, QWidget, QGridLayout, QPushButton, QLabel, QVBoxLayout
+from PyQt6.QtGui import QFont
+from PyQt6.QtCore import Qt
+
+class WhackAMole(QWidget):
+    def __init__(self):
+        super().__init__()
+        self.setWindowTitle("Whack-A-Mole Game")
+        self.setGeometry(100, 100, 400, 500) #X, Y, width, height 
+        self.setStyleSheet("background-color: #38a55b") #color of the background; green 
+
+        # Title at the top and center
+        self.title_label = QLabel("Whack-A-Mole") #title 
+        self.title_label.setFont(QFont("Arial", 28))
+        self.title_label.setStyleSheet("color: #000000") #title in black 
+        self.title_label.setAlignment(Qt.AlignmentFlag.AlignCenter)
+
+        # Score
+        self.score_label = QLabel("Score:")
+        self.score_label.setFont(QFont("Arial", 20))
+        self.score_label.setStyleSheet("color: #000000")#score in black
+        self.score_label.setAlignment(Qt.AlignmentFlag.AlignCenter)
+
+        self.timer_label = QLabel("Timer:")
+        self.timer_label.setFont(QFont("Arial", 20))
+        self.timer_label.setStyleSheet("color: #000000")
+        self.timer_label.setAlignment(Qt.AlignmentFlag.AlignHCenter)
+
+        self.grid_layout = QGridLayout()
+        self.buttons = []
+
+        for row in range(4):
+            row_buttons = []
+            for col in range(4):
+                button = QPushButton("")
+                button.setFixedSize(80, 80) #rounded edges squares
+                button.setStyleSheet("background-color: #964B00") #color of the buttons; brown
+                button.clicked.connect(lambda _, r=row, c=col: self.hit_mole(r, c))
+                self.grid_layout.addWidget(button, row, col)
+                row_buttons.append(button)
+            self.buttons.append(row_buttons)
+
+        layout = QVBoxLayout()
+        layout.addWidget(self.title_label)
+        layout.addWidget(self.score_label)
+        layout.addWidget(self.timer_label)
+        layout.addLayout(self.grid_layout)
+        
+        self.setLayout(layout)
+
+if __name__ == "__main__":
+    app = QApplication(sys.argv)
+    window = WhackAMole()
+    window.show()
+    sys.exit(app.exec())
