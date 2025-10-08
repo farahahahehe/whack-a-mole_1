@@ -1,0 +1,72 @@
+import sys
+from PyQt6.QtWidgets import QApplication, QWidget, QGridLayout, QPushButton, QLabel, QVBoxLayout
+from PyQt6.QtGui import QFont
+from PyQt6.QtCore import Qt
+
+#title of the game, score title (0), timer title (30) and the 4x4 grid, the word 'mole' in black  and yellow grid square, 
+# clicking 'mole' will add +1 to the score
+
+class WhackAMole(QWidget):
+    def __init__(self):
+        super().__init__()
+        self.setWindowTitle("Whack-A-Mole Game")
+        self.setGeometry(100, 100, 400, 500) #X, Y, width, height 
+        self.setStyleSheet("background-color: #38a55b") #color of the background; green 
+
+        # Title at the top and center
+        self.title_label = QLabel("Whack-A-Mole") #title 
+        self.title_label.setFont(QFont("Arial", 28))
+        self.title_label.setStyleSheet("color: #000000") #title in black 
+        self.title_label.setAlignment(Qt.AlignmentFlag.AlignCenter)
+
+        # Score
+        self.score = 0
+        self.score_label = QLabel(f"Score: {self.score}") 
+        self.score_label.setFont(QFont("Arial", 20))
+        self.score_label.setStyleSheet("color: #000000") #tile score in black
+        self.score_label.setAlignment(Qt.AlignmentFlag.AlignCenter)
+
+        # Timer
+        self.timer_label = QLabel("Timer: 30")
+        self.timer_label.setFont(QFont("Arial", 20))
+        self.timer_label.setStyleSheet("color: #000000") 
+        self.timer_label.setAlignment(Qt.AlignmentFlag.AlignHCenter)
+
+        self.grid_layout = QGridLayout()
+        self.buttons = []
+
+        for row in range(4):
+            row_buttons = []
+            for col in range(4):
+                button = QPushButton ("") #empty so no text appear in the grid boxes
+                button.setFixedSize(80, 80) #rounded edges squares
+                button.setStyleSheet("background-color: #964B00") #color of the buttons; brown
+                self.grid_layout.addWidget(button, row, col)
+                row_buttons.append(button) 
+            self.buttons.append(row_buttons)
+
+        # The word 'mole' in a grid
+        self.mole_row = 1 
+        self.mole_col = 2 # the coordinates for where the text 'mole' going to be (1, 2) (row and col starts with 0)
+        self.buttons[self.mole_row][self.mole_col].setText("Mole")
+        self.buttons[self.mole_row][self.mole_col].setStyleSheet("background-color: #FFEA00; color: #000000") #the grid is yellow with the word 'mole' is black
+        self.buttons[self.mole_row][self.mole_col].setFont(QFont("Arial", 20))
+        self.buttons[self.mole_row][self.mole_col].clicked.connect(self.click_mole)
+
+        layout = QVBoxLayout()
+        layout.addWidget(self.title_label)
+        layout.addWidget(self.score_label)
+        layout.addWidget(self.timer_label)
+        layout.addLayout(self.grid_layout)
+        
+        self.setLayout(layout)
+
+    def click_mole(self):
+        self.score += 1 #add 1 to score
+        self.score_label.setText(f"Score: {self.score}")
+
+if __name__ == "__main__":
+    app = QApplication(sys.argv)
+    window = WhackAMole()
+    window.show()
+    sys.exit(app.exec())
