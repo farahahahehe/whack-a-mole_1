@@ -1,0 +1,121 @@
+import sys
+import random
+from PyQt6.QtWidgets import QApplication, QWidget, QGridLayout, QPushButton, QLabel, QVBoxLayout, QMessageBox
+from PyQt6.QtGui import QFont
+from PyQt6.QtCore import Qt, QTimer
+
+# Title of the game, score title, timer title and the 4x4 grid, the word 'mole' in one grid square, clicking 'mole' will add
+# +1 to the score and mole will dissappear, 30 seconds timer countdown, mole appear and change grids in 2 seconds if not clicked,
+# when the game ends (30 seconds over) a message box will pop with final score
+
+class WhackAMole(QWidget):
+    def __init__(self):
+        super().__init__()
+        self.setWindowTitle("Whack-A-Mole Game")
+        self.setGeometry(100, 100, 400, 500) #X, Y, width, height 
+        self.setStyleSheet("background-color: #38a55b") #color of the background; green 
+
+        # Title at the top and center
+        self.title_label = QLabel("Whack-A-Mole") #title 
+        self.title_label.setFont(QFont("Arial", 28))
+        self.title_label.setStyleSheet("color: #000000") #title in black 
+        self.title_label.setAlignment(Qt.AlignmentFlag.AlignCenter)
+
+        # Score
+        self.score = 0
+        self.score_label = QLabel(f"Score: {self.score}") 
+        self.score_label.setFont(QFont("Arial", 20))
+        self.score_label.setStyleSheet("color: #000000") #title score in black
+        self.score_label.setAlignment(Qt.AlignmentFlag.AlignCenter)
+
+        # 30 seconds timer label
+        self.timer = 30
+        self.timer_label = QLabel(f"Timer: {self.timer}")
+        self.timer_label.setFont(QFont("Arial", 20))
+        self.timer_label.setStyleSheet("color: #000000") 
+        self.timer_label.setAlignment(Qt.AlignmentFlag.AlignHCenter)
+
+        # 4x4 Grid
+        self.grid_layout = QGridLayout()
+        self.buttons = []
+
+        for row in range(4):
+            row_buttons = []
+            for col in range(4):
+                button = QPushButton ("") #empty so no text appear in the grid boxes
+                button.setFixedSize(80, 80) #rounded edges squares
+                button.setStyleSheet("background-color: #964B00") #color of the buttons; brown
+                button.clicked.connect(lambda _, r=row, c=col: self.mole_click(r, c))
+                self.grid_layout.addWidget(button, row, col)
+                row_buttons.append(button) 
+            self.buttons.append(row_buttons)
+
+        # Track current mole
+        self.track_mole = (-1, -1)
+
+        # 30 seconds countdown timer
+        self.countdown = QTimer (self)
+        self.countdown.timeout.connect(self.countdown_timer)
+        self.countdown.start(1000)
+
+        # Time for moles to spawn 
+        self.mole_timer = QTimer(self)
+        self.mole_timer.timeout.connect(self.mole_spawn)
+        self.mole_timer.start(2000)  #the word 'mole' change places every 2 seconds (if not clicked)
+
+        layout = QVBoxLayout()
+        layout.addWidget(self.title_label)
+        layout.addWidget(self.score_label)
+        layout.addWidget(self.timer_label)
+        layout.addLayout(self.grid_layout)
+        
+        self.setLayout(layout)
+
+    def mole_click(self, row, col):
+        if (row, col) == self.track_mole:
+            self.score += 1 #add 1 to score
+            self.score_label.setText(f"Score: {self.score}")
+            self.buttons[row][col].setText("")
+            self.buttons[row][col].setStyleSheet("background-color: #964B00")
+            self.track_mole = (-1, -1)
+
+    def countdown_timer(self):
+        self.timer -= 1
+        self.timer_label.setText(f"Timer: {self.timer}")
+        if self.timer <= 0:
+           self.countdown.stop()
+           self.mole_timer.stop()
+           self.game_over()
+
+    def mole_spawn(self):
+        # Clear the 'old' mole
+        row, col = self.track_mole
+        if row != -1 and col != -1:
+            self.buttons[row][col].setText("")
+            self.buttons[row][col].setStyleSheet("background-color: #964B00")
+
+        # Randomly choose new grid
+        row = random.randint(0, 3)
+        col = random.randint(0, 3)
+
+        # New mole
+        self.buttons[row][col].setText("Mole")
+        self.buttons[row][col].setFont(QFont("Arial", 16, QFont.Weight.Bold))
+        self.buttons[row][col].setStyleSheet("background-color: #FFEA00; color: #000000")
+
+        self.track_mole = (row, col)
+
+    def game_over (self):
+        msg = QMessageBox(self)
+        msg.setWindowTitle ("Time's up!")
+        msg.setGeometry(200, 200, 500, 500) #X, Y, width, height 
+        msg.setText(f"Game over! \nFinal score: {self.score}          ")
+        msg.setIcon(QMessageBox.Icon.NoIcon)
+        msg.exec()
+
+if __name__ == "__main__":
+
+    app = QApplication(sys.argv)
+    window = WhackAMole()
+    window.show()
+    sys.exit(app.exec())
